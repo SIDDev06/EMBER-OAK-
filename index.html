@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ember & Oak: flame-grilled steaks, fresh pasta and warm hospitality. Scroll the menu and order online.">
+  <meta name="theme-color" content="#0b0807">
+  <title>Ember & Oak | Restaurant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- No-JS fallback: show menu and order immediately -->
+  <noscript>
+    <style>
+      .journey, .hero-dish, .hero-glow, .hero-glow-flicker, .hero-embers, .hero-scroll, .hero-title span { display: none !important; }
+      .hero { min-height: auto; padding: 60px 8% 40px; }
+      .hero-title span { opacity: 1; }
+      .no-journey .journey, .no-journey a[href="#journey"] { display: none; }
+      html { scroll-behavior: auto; }
+      .modal { display: none !important; }
+      .order-bar { display: none !important; }
+      .finale { display: none !important; }
+      .loader { display: none !important; }
+      body.loading { overflow: auto; }
+      .food-img img { opacity: 1; }
+    </style>
+  </noscript>
+</head>
+<body class="loading">
+
+  <!-- LOADING SCREEN (hides itself when the dish images are ready) -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader-inner">
+      <p class="loader-logo">Ember & Oak</p>
+      <div class="loader-bar"><span id="loader-fill"></span></div>
+      <p class="loader-pct" id="loader-pct">Lighting the fire… 0%</p>
+    </div>
+  </div>
+
+  <!-- thin scroll-progress line at the very top -->
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <a href="#home" class="logo">Ember & Oak</a>
+    <nav class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#journey">Journey</a>
+      <a href="#menu">Menu</a>
+      <a href="#about">About</a>
+      <a href="#chef">Chef</a>
+      <button class="btn btn-small order-btn" aria-label="Open your order">Order <span class="cart-count" id="cart-count">0</span></button>
+      <button class="btn btn-small btn-outline" id="login-btn" type="button" aria-label="Login or register">Login</button>
+    </nav>
+  </header>
+
+  <!-- HERO: cinematic opening -->
+  <section class="hero" id="home">
+    <div class="hero-glow" id="hero-glow" aria-hidden="true">
+      <div class="hero-glow-flicker"></div>
+    </div>
+    <canvas class="hero-embers" id="hero-embers" aria-hidden="true"></canvas>
+
+    <div class="hero-inner">
+      <p class="tagline">Fine Dining • Since 2010</p>
+      <h1 class="hero-title" id="hero-title">
+        <span style="--i:0">GOOD</span><span style="--i:1">FOOD.</span><br>
+        <span style="--i:2">GREAT</span><span style="--i:3">MOMENTS.</span>
+      </h1>
+      <p class="hero-desc">Fresh ingredients, bold flavors and a warm atmosphere. Come hungry, leave happy.</p>
+      <div class="hero-buttons">
+        <a href="#journey" class="btn">Start the Journey</a>
+        <button class="btn btn-outline order-btn">Order Now</button>
+      </div>
+    </div>
+
+    <div class="hero-dish" aria-hidden="true">
+      <img id="hero-dish-img" fetchpriority="high" decoding="async" width="600" height="400" alt="">
+      <div class="hero-dish-shadow"></div>
+    </div>
+
+    <a href="#journey" class="hero-scroll">Scroll</a>
+  </section>
+
+  <!-- JOURNEY: one pinned scene. As you scroll, the dishes change.
+       Everything inside is built by script.js from dishes.js -->
+  <section class="journey" id="journey" aria-label="Dish journey">
+    <div class="j-stage" id="j-stage">
+      <div class="j-bg"></div>
+      <div class="j-titles" id="j-titles" aria-hidden="true"></div>
+      <div class="j-dishes" id="j-dishes"></div>
+      <div class="j-info" id="j-info"></div>
+      <div class="j-hud">
+        <p class="j-count" id="j-count" aria-live="polite">01 / 10</p>
+        <p class="j-cue" id="j-cue">Keep scrolling ↓</p>
+      </div>
+      <div class="j-dots" id="j-dots"></div>
+    </div>
+  </section>
+
+  <!-- FINALE: the plate opens with your order -->
+  <section class="finale" id="finale" aria-label="Your order">
+    <div class="finale-plate" id="finale-plate">
+      <h2>Your Order</h2>
+      <div class="finale-items" id="finale-items"></div>
+      <div class="finale-total">Total: <span id="finale-total">₹0</span></div>
+      <button class="btn" id="finale-place" type="button">Place Order</button>
+      <p class="finale-message" id="finale-message" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- FULL MENU (the quick, no-animation way to order) -->
+  <section class="menu" id="menu">
+    <h2>Our Menu</h2>
+    <p class="section-sub">Fresh, hand-crafted dishes made every day.</p>
+    <div class="menu-grid" id="menu-grid">
+      <noscript>
+        <p class="empty-text">Please enable JavaScript to view the full menu and place orders online. Or call us at +1 234 567 890 to order.</p>
+      </noscript>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <h2>About Us</h2>
+    <p class="about-story">
+      Ember & Oak started as a small family kitchen with one simple idea: cook honest food
+      with great ingredients. Today we still cook everything fresh, every day, over real fire.
+    </p>
+    <div class="info-grid">
+      <div class="info-card"><h3>Location</h3><p>123 Main Street<br>Your City, 12345</p></div>
+      <div class="info-card"><h3>Opening Hours</h3><p>Mon–Fri: 11am – 10pm<br>Sat–Sun: 10am – 11pm</p></div>
+      <div class="info-card"><h3>Contact</h3><p>+1 234 567 890<br>hello@emberandoak.com</p></div>
+    </div>
+  </section>
+
+  <!-- CHEF -->
+  <section class="chef" id="chef">
+    <div class="chef-image">
+      <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=700&q=80" width="700" height="420" alt="Head Chef Marco Rossi">
+    </div>
+    <div class="chef-text">
+      <p class="tagline">Meet The Chef</p>
+      <h2>Chef Marco Rossi</h2>
+      <p class="chef-role">Head Chef</p>
+      <p class="chef-bio">With over 15 years in kitchens across Italy and France, Marco brings classic technique and bold, modern flavor to every plate.</p>
+      <p class="chef-philosophy">"Great food starts with great ingredients. Keep it simple, cook it with respect."</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <h3>Ember & Oak</h3>
+    <p>123 Main Street, Your City, 12345</p>
+    <p class="socials">Instagram • Facebook • TikTok</p>
+    <p class="copyright">© <span id="year">2026</span> Ember & Oak. All rights reserved.</p>
+  </footer>
+
+  <!-- ORDER POPUP -->
+  <div class="modal" id="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-title">
+    <div class="modal-box" data-lenis-prevent>
+      <button class="modal-close" id="close-modal" aria-label="Close order">✕</button>
+      <h2 id="order-title">Your Order</h2>
+      <div id="order-items"></div>
+      <div class="order-total">Total: <span id="order-total">₹0</span></div>
+      <button class="btn" id="place-order">Place Order</button>
+      <p class="order-message" id="order-message" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- BOTTOM ORDER BAR (shown only when the cart has items) -->
+  <div class="order-bar" id="order-bar" aria-hidden="true">
+    <div class="order-bar-plate" id="order-bar-plate" aria-hidden="true">
+      <img id="order-bar-icon" alt="">
+    </div>
+    <div class="order-bar-info">
+      <span class="order-bar-count" id="order-bar-count">0 items</span>
+      <span class="order-bar-total" id="order-bar-total">₹0</span>
+    </div>
+    <button class="btn btn-small" id="order-bar-view" type="button">View Order</button>
+  </div>
+
+  <!-- CHECKOUT MODAL -->
+  <div class="modal" id="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+    <div class="modal-box" data-lenis-prevent>
+      <button class="modal-close" id="close-checkout" aria-label="Close checkout">✕</button>
+      <h2 id="checkout-title">Checkout</h2>
+
+      <!-- Customer Information -->
+      <div class="checkout-section">
+        <h3>Customer Information</h3>
+        <div class="checkout-form">
+          <label>Full Name <span class="req">*</span>
+            <input type="text" id="checkout-name" required autocomplete="name" placeholder="Your full name">
+            <span class="field-error" id="err-name"></span>
+          </label>
+          <label>Phone Number <span class="req">*</span>
+            <input type="tel" id="checkout-phone" required autocomplete="tel" placeholder="10-digit Indian mobile number" maxlength="10">
+            <span class="field-error" id="err-phone"></span>
+          </label>
+          <label>Delivery Address <span class="req">*</span>
+            <textarea id="checkout-address" required rows="3" placeholder="Complete delivery address"></textarea>
+            <span class="field-error" id="err-address"></span>
+          </label>
+          <label>Landmark / Instructions (optional)
+            <input type="text" id="checkout-landmark" placeholder="Nearby landmark or delivery notes">
+          </label>
+        </div>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="checkout-section">
+        <h3>Payment Method</h3>
+        <div class="payment-options">
+          <label class="payment-card" id="pay-cod">
+            <input type="radio" name="payment" value="cod">
+            <div class="payment-card-inner">
+              <span class="payment-icon">💵</span>
+              <span class="payment-label">Cash on Delivery</span>
+              <span class="payment-desc">Pay when your order arrives</span>
+            </div>
+          </label>
+          <label class="payment-card" id="pay-upi">
+            <input type="radio" name="payment" value="upi">
+            <div class="payment-card-inner">
+              <span class="payment-icon">📱</span>
+              <span class="payment-label">Online Payment (UPI)</span>
+              <span class="payment-desc">Pay via UPI / QR code</span>
+            </div>
+          </label>
+        </div>
+        <span class="field-error" id="err-payment"></span>
+
+        <!-- UPI Payment Section -->
+        <div class="upi-section" id="upi-section" style="display:none;">
+          <div class="upi-qr-wrap">
+            <img src="images/store-qr.png" alt="Store UPI QR Code" class="upi-qr" id="upi-qr-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="upi-qr-placeholder" style="display:none;">QR Code<br>Placeholder</div>
+          </div>
+          <div class="upi-details">
+            <p class="upi-id">UPI ID: <strong id="upi-id-text">yourstore@upi</strong></p>
+            <button class="btn btn-small btn-outline" id="copy-upi-btn" type="button">Copy UPI ID</button>
+            <p class="upi-amount">Payable Amount: <span id="upi-amount">₹0</span></p>
+          </div>
+          <p class="upi-note">⚠️ Payment verification may be required before your order is processed. Ticking the confirmation below does not mark the payment as verified.</p>
+          <label class="upi-confirm">
+            <input type="checkbox" id="upi-confirm-check">
+            I've Completed Payment
+          </label>
+          <span class="field-error" id="err-upi-confirm"></span>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="checkout-section">
+        <h3>Order Summary</h3>
+        <div id="checkout-items"></div>
+        <div class="checkout-totals">
+          <div class="checkout-row"><span>Subtotal</span><span id="checkout-subtotal">₹0</span></div>
+          <div class="checkout-row"><span>Delivery</span><span id="checkout-delivery">₹0</span></div>
+          <div class="checkout-row checkout-grand"><span>Grand Total</span><span id="checkout-grand">₹0</span></div>
+        </div>
+      </div>
+
+      <button class="btn" id="confirm-order-btn" type="button">CONFIRM ORDER</button>
+    </div>
+  </div>
+
+  <!-- ORDER SUCCESS MODAL -->
+  <div class="modal" id="success-modal" role="dialog" aria-modal="true" aria-labelledby="success-title">
+    <div class="modal-box" data-lenis-prevent>
+      <div class="success-checkmark">
+        <svg viewBox="0 0 52 52" class="checkmark-svg">
+          <circle cx="26" cy="26" r="25" fill="none" class="checkmark-circle"/>
+          <path fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" class="checkmark-check"/>
+        </svg>
+      </div>
+      <h2 id="success-title">ORDER PLACED SUCCESSFULLY!</h2>
+      <p class="success-sub">Thank you for ordering with us.</p>
+      <div class="success-details">
+        <div class="success-row"><span>Order ID</span><strong id="success-order-id"></strong></div>
+        <div class="success-row"><span>Customer</span><strong id="success-customer"></strong></div>
+        <div class="success-row"><span>Payment</span><strong id="success-payment"></strong></div>
+        <div class="success-row"><span>Total</span><strong id="success-total"></strong></div>
+      </div>
+      <p class="success-delivery" id="success-delivery">Estimated delivery: 30-45 minutes</p>
+      <button class="btn" id="success-done-btn" type="button">DONE</button>
+    </div>
+  </div>
+
+  <!-- FEEDBACK MODAL -->
+  <div class="modal" id="feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
+    <div class="modal-box" data-lenis-prevent>
+      <h2 id="feedback-title">HOW WAS YOUR EXPERIENCE?</h2>
+      <p class="feedback-sub">Your feedback helps us serve you better.</p>
+      <div class="star-rating" id="star-rating">
+        <button class="star-btn" data-rating="1" type="button" aria-label="1 star - Poor">★</button>
+        <button class="star-btn" data-rating="2" type="button" aria-label="2 stars - Fair">★</button>
+        <button class="star-btn" data-rating="3" type="button" aria-label="3 stars - Good">★</button>
+        <button class="star-btn" data-rating="4" type="button" aria-label="4 stars - Very Good">★</button>
+        <button class="star-btn" data-rating="5" type="button" aria-label="5 stars - Excellent">★</button>
+      </div>
+      <p class="rating-label" id="rating-label">Select a rating</p>
+      <label class="feedback-text-label">Optional feedback
+        <textarea id="feedback-text" rows="3" placeholder="Tell us what you think..."></textarea>
+      </label>
+      <div class="feedback-actions">
+        <button class="btn btn-outline" id="skip-feedback-btn" type="button">Skip</button>
+        <button class="btn" id="submit-feedback-btn" type="button">SUBMIT FEEDBACK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THANK YOU MODAL -->
+  <div class="modal" id="thankyou-modal" role="dialog" aria-modal="true" aria-labelledby="thankyou-title">
+    <div class="modal-box" data-lenis-prevent>
+      <div class="thankyou-icon">♥</div>
+      <h2 id="thankyou-title">THANK YOU FOR YOUR FEEDBACK!</h2>
+      <p class="thankyou-sub">We appreciate your time and support. We look forward to serving you again!</p>
+      <button class="btn" id="back-to-menu-btn" type="button">BACK TO MENU</button>
+    </div>
+  </div>
+
+  <!-- ACCOUNT MODAL (login/register + orders) -->
+  <div class="modal" id="account-modal" role="dialog" aria-modal="true" aria-labelledby="account-title">
+    <div class="modal-box" data-lenis-prevent>
+      <button class="modal-close" id="close-account" aria-label="Close account">✕</button>
+      <h2 id="account-title">Account</h2>
+      <div id="account-content"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Optional smooth-scrolling helper. If it cannot load, the site still works. -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
+  <script src="dishes.js"></script>
+  <script src="script.js" defer></script>
+  <script src="checkout.js" defer></script>
+</body>
+</html>
